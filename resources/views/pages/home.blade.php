@@ -184,29 +184,61 @@
                 </p>
             </div>
 
-            <!-- Placeholder for featured books -->
+            <!-- Popular books -->
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                @for($i = 0; $i < 8; $i++)
-                <div class="group hover:shadow-lg transition-all duration-200 border rounded-lg p-4">
-                    <div class="flex space-x-3">
-                        <div class="w-16 h-24 md:w-20 md:h-28 rounded-md overflow-hidden bg-muted flex-shrink-0">
-                            <div class="w-full h-full bg-gradient-to-br from-muted to-muted/50"></div>
+                @if(!empty($popularBooks) && count($popularBooks) > 0)
+                    @foreach($popularBooks as $book)
+                    <a href="{{ route('book.details', ['source' => $book['source'], 'id' => $book['id']]) }}" class="group hover:shadow-lg transition-all duration-200 border rounded-lg p-4">
+                        <div class="flex space-x-3">
+                            <div class="w-16 h-24 md:w-20 md:h-28 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                                @if(isset($book['cover_url']) && $book['cover_url'])
+                                    <img src="{{ $book['cover_url'] }}" alt="{{ $book['title'] }}" class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full bg-gradient-to-br from-muted to-muted/50"></div>
+                                @endif
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-semibold text-sm md:text-base line-clamp-2 mb-1 group-hover:text-primary transition-colors">
+                                    {{ $book['title'] }}
+                                </h3>
+                                <p class="text-sm text-muted-foreground mb-2 line-clamp-1">
+                                    {{ isset($book['authors']) && count($book['authors']) > 0 ? implode(', ', $book['authors']) : 'Autor desconocido' }}
+                                </p>
+                                <div class="flex items-center space-x-3 text-xs text-muted-foreground">
+                                    @if(isset($book['published_date']))
+                                        <span>{{ substr($book['published_date'], 0, 4) }}</span>
+                                    @endif
+                                    @if(isset($book['page_count']))
+                                        <span>{{ $book['page_count'] }} {{ __('app.books.info.pages') }}</span>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <h3 class="font-semibold text-sm md:text-base line-clamp-2 mb-1">
-                                Libro de ejemplo {{ $i + 1 }}
-                            </h3>
-                            <p class="text-sm text-muted-foreground mb-2">
-                                Autor de ejemplo
-                            </p>
-                            <div class="flex items-center space-x-3 text-xs text-muted-foreground">
-                                <span>2024</span>
-                                <span>300 págs.</span>
+                    </a>
+                    @endforeach
+                @else
+                    @for($i = 0; $i < 8; $i++)
+                    <div class="group hover:shadow-lg transition-all duration-200 border rounded-lg p-4">
+                        <div class="flex space-x-3">
+                            <div class="w-16 h-24 md:w-20 md:h-28 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                                <div class="w-full h-full bg-gradient-to-br from-muted to-muted/50"></div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-semibold text-sm md:text-base line-clamp-2 mb-1">
+                                    Libro de ejemplo {{ $i + 1 }}
+                                </h3>
+                                <p class="text-sm text-muted-foreground mb-2">
+                                    Autor de ejemplo
+                                </p>
+                                <div class="flex items-center space-x-3 text-xs text-muted-foreground">
+                                    <span>2024</span>
+                                    <span>300 págs.</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                @endfor
+                    @endfor
+                @endif
             </div>
 
             <div class="text-center mt-12">

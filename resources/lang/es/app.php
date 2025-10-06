@@ -9,6 +9,11 @@ return [
         'error' => 'Error',
         'success' => 'Éxito',
         'cancel' => 'Cancelar',
+        'category' =>[
+            'add' => 'Añadir Categoría',
+            'delete' => 'Eliminar Categoría',
+            'close' => 'Cerrar',
+        ] ,
         'save' => 'Guardar',
         'delete' => 'Eliminar',
         'edit' => 'Editar',
@@ -221,7 +226,9 @@ return [
     ],
     
     'books' => [
+        'in_library' => 'En tu biblioteca',
         'categories' => [
+            'title' => 'Categorías',
             'to_read' => 'Por Leer',
             'reading' => 'Leyendo',
             'read' => 'Leídos',
@@ -235,6 +242,8 @@ return [
             'add_to_favorites' => 'Añadir a Favoritos',
             'view_details' => 'Ver Detalles',
             'edit' => 'Editar',
+            'delete' => 'Eliminar',
+            'confirm_delete' => '¿Estás seguro de que quieres eliminar este libro de tu biblioteca?',
             'rating' => 'Mi Valoración',
             'notes' => 'Notas',
             'adding' => 'Añadiendo...',
@@ -244,7 +253,8 @@ return [
             'no_rating' => 'Sin valorar',
             'login_to_add' => 'Inicia sesión para añadir libros a tu biblioteca',
             'preview' => 'Vista Previa',
-            'more_info' => 'Más Información'
+            'more_info' => 'Más Información',
+            'manage_categories' => 'Gestionar Categorías'
         ],
         'details' => [
             'authors' => 'Autores',
@@ -268,9 +278,32 @@ return [
             'added' => '¡Libro añadido!',
             'updated' => '¡Libro actualizado!',
             'already_added' => 'Este libro ya está en tu biblioteca',
-            'added_desc' => '":title" se ha añadido a tu biblioteca.'
+            'added_desc' => '":title" se ha añadido a tu biblioteca.',
+            'deleted' => 'Libro eliminado de tu biblioteca',
+            'not_found' => 'Libro no encontrado'
         ],
         'added' => 'Añadido'
+    ],
+    
+    'shelves' => [
+        'title' => 'Mis Estanterías',
+        'manage' => 'Gestionar Estanterías',
+        'system' => 'Estanterías del Sistema',
+        'custom' => 'Estanterías Personalizadas',
+        'no_custom' => 'No tienes estanterías personalizadas',
+        'assign' => 'Asignar a Estanterías',
+        'create' => 'Crear Estantería',
+        'edit' => 'Editar Estantería',
+        'delete' => 'Eliminar Estantería',
+        'name' => 'Nombre',
+        'color' => 'Color',
+        'icon' => 'Icono',
+    ],
+    
+    'categories' => [
+        'title' => 'Categorías',
+        'global' => 'Categorías Globales',
+        'description' => 'Las categorías son géneros/temas globales de los libros',
     ],
     
     'template' => [
@@ -287,6 +320,7 @@ return [
         'add_books' => 'Añadir Libros',
         'import_excel' => 'Importar Excel',
         'search_placeholder' => 'Buscar en tu biblioteca...',
+        'all_books' => 'Todos los libros (:count)',
         'all_categories' => 'Todas las categorías (:count)',
         'empty' => [
             'title' => 'Tu biblioteca está vacía',
@@ -344,5 +378,16 @@ return [
             'file_too_large' => 'El archivo es demasiado grande',
             'no_books_found' => 'No se encontraron libros en el archivo'
         ]
+    ],
+    
+    'footer' => [
+        'support' => 'Soporte',
+        'help' => 'Ayuda',
+        'contact' => 'Contacto',
+        'privacy' => 'Privacidad',
+        'terms' => 'Términos',
+        'rights' => 'Todos los derechos reservados.',
+        'made_with' => 'Hecho con',
+        'in_spain' => 'en España'
     ]
 ];

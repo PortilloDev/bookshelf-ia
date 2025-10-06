@@ -37,25 +37,25 @@
             <!-- Search Options -->
             <div class="flex flex-wrap gap-4 items-center">
                 <select name="type" class="w-40 px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring">
-                    <option value="general">{{ __('app.search.types.general') }}</option>
-                    <option value="title">{{ __('app.search.types.title') }}</option>
-                    <option value="author">{{ __('app.search.types.author') }}</option>
-                    <option value="isbn">{{ __('app.search.types.isbn') }}</option>
-                    <option value="subject">{{ __('app.search.types.subject') }}</option>
+                    <option value="general" {{ request('type', 'general') === 'general' ? 'selected' : '' }}>{{ __('app.search.types.general') }}</option>
+                    <option value="title" {{ request('type') === 'title' ? 'selected' : '' }}>{{ __('app.search.types.title') }}</option>
+                    <option value="author" {{ request('type') === 'author' ? 'selected' : '' }}>{{ __('app.search.types.author') }}</option>
+                    <option value="isbn" {{ request('type') === 'isbn' ? 'selected' : '' }}>{{ __('app.search.types.isbn') }}</option>
+                    <option value="subject" {{ request('type') === 'subject' ? 'selected' : '' }}>{{ __('app.search.types.subject') }}</option>
                 </select>
 
                 <select name="language" class="w-32 px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring">
-                    <option value="all">{{ __('app.search.languages.all') }}</option>
-                    <option value="es">{{ __('app.search.languages.es') }}</option>
-                    <option value="en">{{ __('app.search.languages.en') }}</option>
-                    <option value="fr">{{ __('app.search.languages.fr') }}</option>
-                    <option value="de">{{ __('app.search.languages.de') }}</option>
-                    <option value="it">{{ __('app.search.languages.it') }}</option>
+                    <option value="all" {{ request('language', 'all') === 'all' ? 'selected' : '' }}>{{ __('app.search.languages.all') }}</option>
+                    <option value="es" {{ request('language') === 'es' ? 'selected' : '' }}>{{ __('app.search.languages.es') }}</option>
+                    <option value="en" {{ request('language') === 'en' ? 'selected' : '' }}>{{ __('app.search.languages.en') }}</option>
+                    <option value="fr" {{ request('language') === 'fr' ? 'selected' : '' }}>{{ __('app.search.languages.fr') }}</option>
+                    <option value="de" {{ request('language') === 'de' ? 'selected' : '' }}>{{ __('app.search.languages.de') }}</option>
+                    <option value="it" {{ request('language') === 'it' ? 'selected' : '' }}>{{ __('app.search.languages.it') }}</option>
                 </select>
 
                 <select name="sort" class="w-32 px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring">
-                    <option value="relevance">{{ __('app.search.sorting.relevance') }}</option>
-                    <option value="newest">{{ __('app.search.sorting.newest') }}</option>
+                    <option value="relevance" {{ request('sort', 'relevance') === 'relevance' ? 'selected' : '' }}>{{ __('app.search.sorting.relevance') }}</option>
+                    <option value="newest" {{ request('sort') === 'newest' ? 'selected' : '' }}>{{ __('app.search.sorting.newest') }}</option>
                 </select>
             </div>
         </form>
@@ -109,8 +109,27 @@
         @if(count($books) > 0)
         <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             @foreach($books as $book)
-            <div class="group hover:shadow-lg transition-all duration-200 border rounded-lg p-4">
-                <div class="flex space-x-3">
+            @php
+                $inLibrary = isset($book['in_library']) && $book['in_library'];
+                if (!$inLibrary && auth()->check() && isset($userBookIds[$book['source'] ?? ''])) {
+                    $inLibrary = $userBookIds[$book['source']] == $book['id'];
+                }
+            @endphp
+            <div class="group hover:shadow-lg transition-all duration-200 border rounded-lg overflow-hidden flex flex-col {{ $inLibrary ? 'ring-2 ring-green-500/50' : '' }}">
+                @if($inLibrary)
+                <div class="bg-green-500 text-white px-3 py-1.5 text-xs font-medium flex items-center justify-between">
+                    <span class="flex items-center">
+                        <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        {{ __('app.books.in_library') }}
+                    </span>
+                    @if(isset($book['user_status']))
+                    <span class="text-xs opacity-90">{{ __('app.books.categories.' . str_replace('-', '_', $book['user_status'])) }}</span>
+                    @endif
+                </div>
+                @endif
+                <div class="p-4 flex space-x-3 flex-1">
                     <!-- Book Cover -->
                     <div class="w-16 h-24 md:w-20 md:h-28 rounded-md overflow-hidden bg-muted flex-shrink-0">
                         @if(isset($book['cover_url']) && $book['cover_url'])
@@ -166,7 +185,7 @@
                         @endif
 
                         <!-- Metadata -->
-                        <div class="flex items-center space-x-3 text-xs text-muted-foreground mb-3">
+                        <div class="flex items-center space-x-3 text-xs text-muted-foreground">
                             @if(isset($book['published_date']))
                             <span>{{ date('Y', strtotime($book['published_date'])) }}</span>
                             @endif
@@ -179,55 +198,65 @@
                             </span>
                             @endif
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Action Buttons -->
-                        <div class="flex space-x-2">
-                            <a href="{{ route('book.details', ['source' => $book['source'], 'id' => $book['id']]) }}" 
-                               class="flex-1 inline-flex items-center justify-center px-3 py-1.5 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-xs font-medium transition-colors">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                <!-- Action Buttons - Full width at bottom -->
+                <div class="border-t p-3 flex gap-2">
+                    <a href="{{ route('book.details', ['source' => $book['source'], 'id' => $book['id']]) }}" 
+                       class="flex-1 inline-flex items-center justify-center px-3 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-sm font-medium transition-colors">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        {{ __('app.books.actions.view_details') }}
+                    </a>
+                    
+                    @auth
+                        @if($inLibrary)
+                            <a href="{{ route('library') }}" 
+                               class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-green-600 text-white hover:bg-green-700 rounded-md text-sm font-medium transition-colors">
+                                <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                 </svg>
-                                {{ __('app.books.actions.view_details') }}
+                                {{ __('app.books.in_library') }}
                             </a>
-                            
-                            @auth
-                                <form method="POST" action="{{ route('library.add') }}" class="flex-1">
-                                    @csrf
-                                    <input type="hidden" name="book_id" value="{{ $book['id'] }}">
-                                    <input type="hidden" name="book_source" value="{{ $book['source'] }}">
-                                    <input type="hidden" name="book_title" value="{{ $book['title'] }}">
-                                    <input type="hidden" name="book_authors" value="{{ implode(', ', $book['authors'] ?? []) }}">
-                                    <input type="hidden" name="book_image" value="{{ $book['cover_url'] ?? '' }}">
-                                    <input type="hidden" name="book_description" value="{{ $book['description'] ?? '' }}">
-                                    <input type="hidden" name="book_publisher" value="{{ $book['publisher'] ?? '' }}">
-                                    <input type="hidden" name="book_published_date" value="{{ $book['published_date'] ?? '' }}">
-                                    <input type="hidden" name="book_page_count" value="{{ $book['page_count'] ?? '' }}">
-                                    <input type="hidden" name="book_isbn" value="{{ $book['isbn'] ?? '' }}">
-                                    <input type="hidden" name="book_rating" value="{{ $book['rating'] ?? '' }}">
-                                    <input type="hidden" name="book_categories" value="{{ implode(', ', $book['categories'] ?? []) }}">
-                                    <input type="hidden" name="book_preview_url" value="{{ $book['preview_url'] ?? '' }}">
-                                    <input type="hidden" name="book_info_url" value="{{ $book['info_url'] ?? '' }}">
-                                    
-                                    <button type="submit" 
-                                            class="w-full inline-flex items-center justify-center px-3 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-xs font-medium transition-colors">
-                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                        </svg>
-                                        {{ __('app.books.actions.add_to_library') }}
-                                    </button>
-                                </form>
-                            @else
-                                <a href="{{ route('login') }}" 
-                                   class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-xs font-medium transition-colors">
-                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        @else
+                            <form method="POST" action="{{ route('library.add') }}" class="flex-1">
+                                @csrf
+                                <input type="hidden" name="book_id" value="{{ $book['id'] }}">
+                                <input type="hidden" name="book_source" value="{{ $book['source'] }}">
+                                <input type="hidden" name="book_title" value="{{ $book['title'] }}">
+                                <input type="hidden" name="book_authors" value="{{ implode(', ', $book['authors'] ?? []) }}">
+                                <input type="hidden" name="book_image" value="{{ $book['cover_url'] ?? '' }}">
+                                <input type="hidden" name="book_description" value="{{ $book['description'] ?? '' }}">
+                                <input type="hidden" name="book_publisher" value="{{ $book['publisher'] ?? '' }}">
+                                <input type="hidden" name="book_published_date" value="{{ $book['published_date'] ?? '' }}">
+                                <input type="hidden" name="book_page_count" value="{{ $book['page_count'] ?? '' }}">
+                                <input type="hidden" name="book_isbn" value="{{ $book['isbn'] ?? '' }}">
+                                <input type="hidden" name="book_rating" value="{{ $book['rating'] ?? '' }}">
+                                <input type="hidden" name="book_categories" value="{{ implode(', ', $book['categories'] ?? []) }}">
+                                <input type="hidden" name="book_preview_url" value="{{ $book['preview_url'] ?? '' }}">
+                                <input type="hidden" name="book_info_url" value="{{ $book['info_url'] ?? '' }}">
+                                
+                                <button type="submit" 
+                                        class="w-full inline-flex items-center justify-center px-3 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-sm font-medium transition-colors">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                     </svg>
                                     {{ __('app.books.actions.add_to_library') }}
-                                </a>
-                            @endauth
-                        </div>
-                    </div>
+                                </button>
+                            </form>
+                        @endif
+                    @else
+                        <a href="{{ route('login') }}" 
+                           class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-sm font-medium transition-colors">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                            </svg>
+                            {{ __('app.navigation.login') }}
+                        </a>
+                    @endauth
                 </div>
             </div>
             @endforeach

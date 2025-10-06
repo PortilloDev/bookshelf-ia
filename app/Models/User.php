@@ -54,18 +54,49 @@ class User extends Authenticatable
     public function books()
     {
         return $this->belongsToMany(Book::class, 'user_books')
-                    ->withPivot(['status', 'notes', 'user_rating', 'started_reading', 'finished_reading', 'current_page'])
+                    ->withPivot(['notes', 'user_rating', 'started_reading', 'finished_reading', 'current_page', 'tags'])
                     ->withTimestamps();
+    }
+
+    /**
+     * Get user's shelves
+     */
+    public function shelves()
+    {
+        return $this->hasMany(UserShelf::class)->orderBy('order');
+    }
+
+    /**
+     * Get user's system shelves
+     */
+    public function systemShelves()
+    {
+        return $this->shelves()->where('is_system', true);
+    }
+
+    /**
+     * Get user's custom shelves
+     */
+    public function customShelves()
+    {
+        return $this->shelves()->where('is_system', false);
+    }
+
+    /**
+     * Get shelf by slug
+     */
+    public function getShelfBySlug($slug)
+    {
+        return $this->shelves()->where('slug', $slug)->first();
     }
 
     public function getReadingStatsAttribute()
     {
-        $userBooks = $this->userBooks();
-        
         return [
-            'readBooks' => $userBooks->where('status', 'read')->count(),
-            'readingBooks' => $userBooks->where('status', 'reading')->count(),
-            'favoriteBooks' => $userBooks->where('status', 'favorites')->count(),
+            'readBooks' => $this->getShelfBySlug('read')?->books_count ?? 0,
+            'readingBooks' => $this->getShelfBySlug('reading')?->books_count ?? 0,
+            'favoriteBooks' => $this->getShelfBySlug('favorites')?->books_count ?? 0,
+            'totalBooks' => $this->userBooks()->count(),
         ];
     }
 }

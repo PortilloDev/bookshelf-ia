@@ -93,17 +93,27 @@
             @else
             <div class="space-y-4">
                 @foreach($recentBooks as $book)
-                <div class="flex items-center space-x-3">
-                    <div class="w-8 h-12 bg-muted rounded flex-shrink-0"></div>
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-12 bg-muted rounded flex-shrink-0">
+                        @if(!empty($book['cover_url']))
+                        <img src="{{ $book['cover_url'] }}" alt="{{ $book['title'] }}" class="w-full h-full object-cover rounded">
+                        @endif
+                    </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-medium truncate">{{ $book['title'] }}</p>
-                        <p class="text-xs text-muted-foreground">
+                        <p class="text-xs text-muted-foreground mb-1">
                             {{ implode(', ', $book['authors'] ?? []) }}
                         </p>
+                        <div class="flex flex-wrap gap-1">
+                            @if(!empty($book['shelves']))
+                                @foreach($book['shelves'] as $shelf)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" style="background-color: {{ $shelf['color'] }}22; color: {{ $shelf['color'] }}; border: 1px solid {{ $shelf['color'] }}">
+                                    @if(!empty($shelf['icon'])){{ $shelf['icon'] }}@endif {{ $shelf['name'] }}
+                                </span>
+                                @endforeach
+                            @endif
+                        </div>
                     </div>
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border border-input bg-background text-foreground">
-                        {{ $book['category'] ?? 'Sin categoría' }}
-                    </span>
                 </div>
                 @endforeach
             </div>

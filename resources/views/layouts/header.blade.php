@@ -97,7 +97,7 @@
                             <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
-                            {{ __('books.actions.addToLibrary') }}
+                            {{ __('app.books.actions.add_to_library') }}
                         </a>
 
                         <!-- User Menu -->
@@ -192,3 +192,33 @@
 </header>
 
 <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Language selector functionality
+        const langSelector = document.getElementById('language-selector');
+        if (langSelector) {
+            langSelector.addEventListener('change', function() {
+                const selectedLang = this.value;
+                window.location.href = `/language/${selectedLang}`;
+            });
+        }
+
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function() {
+                const html = document.documentElement;
+                const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                html.classList.remove('light', 'dark');
+                html.classList.add(newTheme);
+                document.cookie = `theme=${newTheme}; path=/; max-age=31536000`;
+                
+                // Force a rerender to update the icons
+                themeToggle.blur();
+            });
+        }
+    });
+</script>

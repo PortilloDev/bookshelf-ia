@@ -21,20 +21,106 @@ class BookSearchService
     public function searchBooks($query, $options = [])
     {
         $results = [];
+        $localBookIds = [];
         
+        // First, search in local database if user is authenticated
+        if (!empty($options['user_id'])) {
+            $localResults = $this->searchLocalBooks($query, $options);
+            if (!empty($localResults)) {
+                $results = array_merge($results, $localResults);
+                
+                // Store local book IDs to filter duplicates from external APIs
+                foreach ($localResults as $book) {
+                    if (!empty($book['id'])) {
+                        $localBookIds[] = $book['id'];
+                    }
+                }
+            }
+        }
+        
+        // Then search external APIs
         // Try Google Books first
         $googleResults = $this->searchGoogleBooks($query, $options);
         if (!empty($googleResults)) {
+            // Filter out books that are already in local results
+            $googleResults = $this->filterDuplicates($googleResults, $localBookIds);
             $results = array_merge($results, $googleResults);
         }
         
-        // If no results from Google Books, try Open Library
-        if (empty($results)) {
+        // If still no results or need more, try Open Library
+        if (count($results) < ($options['limit'] ?? 20)) {
             $openLibraryResults = $this->searchOpenLibrary($query, $options);
+            // Filter out books that are already in results
+            $openLibraryResults = $this->filterDuplicates($openLibraryResults, $localBookIds);
             $results = array_merge($results, $openLibraryResults);
         }
         
         return $results;
+    }
+    
+    /**
+     * Filter out duplicate books based on IDs
+     */
+    private function filterDuplicates($books, $existingIds)
+    {
+        if (empty($existingIds)) {
+            return $books;
+        }
+        
+        return array_filter($books, function($book) use ($existingIds) {
+            return !in_array($book['id'] ?? null, $existingIds);
+        });
+    }
+    
+    /**
+     * Search books in local database
+     */
+    private function searchLocalBooks($query, $options = [])
+    {
+        try {
+            $user = \App\Models\User::find($options['user_id']);
+            if (!$user) {
+                return [];
+            }
+            
+            // Search in user's books
+            $userBooks = $user->userBooks()
+                ->with('book')
+                ->whereHas('book', function($q) use ($query) {
+                    $q->where('title', 'ilike', "%{$query}%")
+                      ->orWhereRaw("authors::text ilike ?", ["%{$query}%"]);
+                })
+                ->limit(5) // Limit local results
+                ->get();
+            
+            $results = [];
+            foreach ($userBooks as $userBook) {
+                $book = $userBook->book;
+                $results[] = [
+                    'id' => $book->external_id ?? $book->id,
+                    'source' => $book->source ?? 'local',
+                    'title' => $book->title,
+                    'authors' => $book->authors ?? [],
+                    'description' => $book->description,
+                    'cover_url' => $book->cover_url,
+                    'publisher' => $book->publisher,
+                    'published_date' => $book->published_date,
+                    'page_count' => $book->page_count,
+                    'isbn' => $book->isbn,
+                    'rating' => $book->rating,
+                    'categories' => $book->categories ?? [],
+                    'preview_url' => $book->preview_url,
+                    'info_url' => $book->info_url,
+                    'in_library' => true, // Mark as already in library
+                    'user_status' => $userBook->status,
+                ];
+            }
+            
+            return $results;
+        } catch (\Exception $e) {
+            \Log::error('Local search error: ' . $e->getMessage());
+            return [];
+        }
     }
 
     /**
@@ -43,13 +129,38 @@ class BookSearchService
     private function searchGoogleBooks($query, $options = [])
     {
         try {
+            // Build search query based on type
+            $searchQuery = $query;
+            $type = $options['type'] ?? 'general';
+            
+            if ($type === 'title') {
+                $searchQuery = 'intitle:' . $query;
+            } elseif ($type === 'author') {
+                $searchQuery = 'inauthor:' . $query;
+            } elseif ($type === 'isbn') {
+                $searchQuery = 'isbn:' . $query;
+            } elseif ($type === 'subject') {
+                $searchQuery = 'subject:' . $query;
+            }
+            
             $params = [
-                'q' => $query,
+                'q' => $searchQuery,
                 'maxResults' => $options['limit'] ?? 20,
                 'startIndex' => $options['offset'] ?? 0,
-                'printType' => 'books',
-                'langRestrict' => $options['language'] ?? 'es'
+                'printType' => 'books'
             ];
+            
+            // Only apply language filter if specified and not 'all'
+            $language = $options['language'] ?? 'es';
+            if ($language !== 'all') {
+                $params['langRestrict'] = $language;
+            }
+            
+            // Apply sorting if specified
+            $sort = $options['sort'] ?? 'relevance';
+            if ($sort === 'newest') {
+                $params['orderBy'] = 'newest';
+            }
 
             if ($this->googleBooksApiKey) {
                 $params['key'] = $this->googleBooksApiKey;

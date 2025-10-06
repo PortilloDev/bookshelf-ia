@@ -9,6 +9,11 @@ return [
         'error' => 'Error',
         'success' => 'Success',
         'cancel' => 'Cancel',
+        'category' =>[
+           'add' => 'Category add',
+           'delete' => 'Delete Category',
+           'close' => 'Close',
+        ] ,
         'save' => 'Save',
         'delete' => 'Delete',
         'edit' => 'Edit',
@@ -227,7 +232,9 @@ return [
     ],
     
     'books' => [
+        'in_library' => 'In your library',
         'categories' => [
+            'title' => 'Categories',
             'to_read' => 'To Read',
             'reading' => 'Reading',
             'read' => 'Read',
@@ -240,10 +247,17 @@ return [
             'mark_as_read' => 'Mark as Read',
             'add_to_favorites' => 'Add to Favorites',
             'view_details' => 'View Details',
+            'edit' => 'Edit',
+            'delete' => 'Delete',
+            'confirm_delete' => 'Are you sure you want to remove this book from your library?',
             'adding' => 'Adding...',
             'select_category' => 'Select category',
             'optional_notes' => 'Notes (optional)',
-            'notes_placeholder' => 'Add your notes about this book...'
+            'notes_placeholder' => 'Add your notes about this book...',
+            'notes' => 'Notes',
+            'rating' => 'My Rating',
+            'no_rating' => 'No rating',
+            'manage_categories' => 'Manage Categories'
         ],
         'info' => [
             'pages' => 'pages',
@@ -255,8 +269,33 @@ return [
         ],
         'messages' => [
             'added' => 'Book added!',
-            'added_desc' => '":title" has been added to your library.'
+            'added_desc' => '":title" has been added to your library.',
+            'updated' => 'Book updated!',
+            'already_added' => 'This book is already in your library',
+            'deleted' => 'Book removed from your library',
+            'not_found' => 'Book not found'
         ]
+    ],
+    
+    'shelves' => [
+        'title' => 'My Shelves',
+        'manage' => 'Manage Shelves',
+        'system' => 'System Shelves',
+        'custom' => 'Custom Shelves',
+        'no_custom' => 'You have no custom shelves',
+        'assign' => 'Assign to Shelves',
+        'create' => 'Create Shelf',
+        'edit' => 'Edit Shelf',
+        'delete' => 'Delete Shelf',
+        'name' => 'Name',
+        'color' => 'Color',
+        'icon' => 'Icon',
+    ],
+    
+    'categories' => [
+        'title' => 'Categories',
+        'global' => 'Global Categories',
+        'description' => 'Categories are global genres/topics of books',
     ],
     
     'footer' => [

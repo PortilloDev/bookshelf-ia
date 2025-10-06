@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Book;
 use App\Models\UserBook;
+use App\Models\UserShelf;
+use App\Models\UserShelfItem;
 
 class LibraryController extends Controller
 {
@@ -24,35 +26,56 @@ class LibraryController extends Controller
     {
         $user = Auth::user();
         $searchQuery = $request->get('search', '');
-        $category = $request->get('category', 'all');
+        $shelfSlug = $request->get('shelf', 'all');
         
-        // Get user books from database
-        $query = $user->userBooks()->with('book');
+        // Get user's shelves with book counts
+        $shelves = $user->shelves()->with('items')->get()->map(function($shelf) {
+            return [
+                'id' => $shelf->slug,
+                'name' => $shelf->name,
+                'icon' => $shelf->icon,
+                'color' => $shelf->color,
+                'count' => $shelf->items->count(),
+                'is_system' => $shelf->is_system
+            ];
+        });
+        
+        // Get books based on shelf selection
+        if ($shelfSlug === 'all') {
+            // Get all user books
+            $query = $user->userBooks()->with(['book']);
+        } else {
+            // Get books from specific shelf
+            $shelf = $user->shelves()->where('slug', $shelfSlug)->first();
+            if (!$shelf) {
+                return redirect()->route('library');
+            }
+            
+            $bookIds = $shelf->items()->pluck('book_id');
+            $query = $user->userBooks()->with(['book'])->whereIn('book_id', $bookIds);
+        }
         
         // Filter by search query
         if (!empty($searchQuery)) {
             $query->whereHas('book', function($q) use ($searchQuery) {
                 $q->where('title', 'ilike', "%{$searchQuery}%")
-                  ->orWhereJsonContains('authors', $searchQuery);
+                  ->orWhereRaw("authors::text ilike ?", ["%{$searchQuery}%"]);
             });
-        }
-        
-        // Filter by category
-        if ($category !== 'all') {
-            $query->where('status', $category);
         }
         
         $userBooks = $query->get();
         
-        $categories = [
-            ['id' => 'to-read', 'name' => 'Por Leer', 'icon' => '📚'],
-            ['id' => 'reading', 'name' => 'Leyendo', 'icon' => '📖'],
-            ['id' => 'read', 'name' => 'Leídos', 'icon' => '✅'],
-            ['id' => 'favorites', 'name' => 'Favoritos', 'icon' => '❤️'],
-            ['id' => 'wishlist', 'name' => 'Lista de Deseos', 'icon' => '⭐']
-        ];
+        // Add shelf information to each book
+        $userBooks = $userBooks->map(function($userBook) use ($user) {
+            $shelfItems = \App\Models\UserShelfItem::where('user_id', $user->id)
+                ->where('book_id', $userBook->book_id)
+                ->with('shelf')
+                ->get();
+            $userBook->userShelves = $shelfItems->pluck('shelf');
+            return $userBook;
+        });
 
-        return view('pages.library', compact('user', 'userBooks', 'categories', 'searchQuery', 'category'));
+        return view('pages.library', compact('user', 'userBooks', 'shelves', 'searchQuery', 'shelfSlug'));
     }
 
     public function addBook(Request $request)
@@ -133,8 +156,9 @@ class LibraryController extends Controller
         try {
             $request->validate([
                 'notes' => 'nullable|string|max:1000',
-                'status' => 'nullable|string|in:to-read,reading,read,favorites,wishlist',
-                'user_rating' => 'nullable|integer|between:1,5'
+                'user_rating' => 'nullable|integer|between:1,5',
+                'shelf_ids' => 'nullable|array',
+                'shelf_ids.*' => 'exists:user_shelves,id'
             ]);
 
             $user = Auth::user();
@@ -148,14 +172,180 @@ class LibraryController extends Controller
 
             $userBook->update([
                 'notes' => $request->notes,
-                'status' => $request->status ?? $userBook->status,
                 'user_rating' => $request->user_rating
             ]);
+
+            // Sync shelves
+            if ($request->has('shelf_ids')) {
+                // Remove old shelf items
+                UserShelfItem::where('user_id', $user->id)
+                    ->where('book_id', $userBook->book_id)
+                    ->delete();
+                
+                // Add new shelf items
+                foreach ($request->shelf_ids as $shelfId) {
+                    UserShelfItem::create([
+                        'user_id' => $user->id,
+                        'shelf_id' => $shelfId,
+                        'book_id' => $userBook->book_id,
+                        'position' => 0,
+                        'added_at' => now()
+                    ]);
+                }
+            }
 
             return redirect()->back()->with('success', __('app.books.messages.updated'));
         } catch (\Exception $e) {
             \Log::error('Error updating book: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error al actualizar el libro: ' . $e->getMessage());
+        }
+    }
+
+    public function deleteBook($userBookId)
+    {
+        try {
+            $user = Auth::user();
+            $userBook = UserBook::where('id', $userBookId)
+                               ->where('user_id', $user->id)
+                               ->first();
+
+            if (!$userBook) {
+                return redirect()->back()->with('error', __('app.books.messages.not_found'));
+            }
+
+            // Delete the user_book (not the book itself)
+            $userBook->delete();
+
+            return redirect()->back()->with('success', __('app.books.messages.deleted'));
+        } catch (\Exception $e) {
+            \Log::error('Error deleting book from library: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al eliminar el libro: ' . $e->getMessage());
+        }
+    }
+
+    public function storeCategory(Request $request)
+    {
+        try {
+            $request->validate([
+                'name' => 'required|string|max:50',
+                'color' => 'nullable|string|max:7',
+                'icon' => 'nullable|string|max:10'
+            ]);
+
+            $user = Auth::user();
+            
+            // Check if category name already exists for this user
+            $exists = UserCategory::where('user_id', $user->id)
+                                 ->where('name', $request->name)
+                                 ->exists();
+            
+            if ($exists) {
+                return response()->json(['error' => __('app.categories.messages.already_exists')], 422);
+            }
+
+            $category = UserCategory::create([
+                'user_id' => $user->id,
+                'name' => $request->name,
+                'color' => $request->color ?? '#3B82F6',
+                'icon' => $request->icon
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'category' => $category,
+                'message' => __('app.categories.messages.created')
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error creating category: ' . $e->getMessage());
+            return response()->json(['error' => 'Error al crear la categoría'], 500);
+        }
+    }
+
+    public function updateCategory(Request $request, $categoryId)
+    {
+        try {
+            $request->validate([
+                'name' => 'required|string|max:50',
+                'color' => 'nullable|string|max:7',
+                'icon' => 'nullable|string|max:10'
+            ]);
+
+            $user = Auth::user();
+            $category = UserCategory::where('id', $categoryId)
+                                   ->where('user_id', $user->id)
+                                   ->first();
+
+            if (!$category) {
+                return response()->json(['error' => __('app.categories.messages.not_found')], 404);
+            }
+
+            $category->update([
+                'name' => $request->name,
+                'color' => $request->color ?? $category->color,
+                'icon' => $request->icon
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'category' => $category,
+                'message' => __('app.categories.messages.updated')
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error updating category: ' . $e->getMessage());
+            return response()->json(['error' => 'Error al actualizar la categoría'], 500);
+        }
+    }
+
+    public function deleteCategory($categoryId)
+    {
+        try {
+            $user = Auth::user();
+            $category = UserCategory::where('id', $categoryId)
+                                   ->where('user_id', $user->id)
+                                   ->first();
+
+            if (!$category) {
+                return response()->json(['error' => __('app.categories.messages.not_found')], 404);
+            }
+
+            $category->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => __('app.categories.messages.deleted')
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error deleting category: ' . $e->getMessage());
+            return response()->json(['error' => 'Error al eliminar la categoría'], 500);
+        }
+    }
+
+    public function assignCategories(Request $request, $userBookId)
+    {
+        try {
+            $request->validate([
+                'category_ids' => 'nullable|array',
+                'category_ids.*' => 'exists:user_categories,id'
+            ]);
+
+            $user = Auth::user();
+            $userBook = UserBook::where('id', $userBookId)
+                               ->where('user_id', $user->id)
+                               ->first();
+
+            if (!$userBook) {
+                return response()->json(['error' => __('app.books.messages.not_found')], 404);
+            }
+
+            // Note: This endpoint is deprecated, use updateBook instead
+
+            return response()->json([
+                'success' => true,
+                'message' => __('app.categories.messages.assigned')
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error assigning categories: ' . $e->getMessage());
+            return response()->json(['error' => 'Error al asignar categorías'], 500);
         }
     }
 }

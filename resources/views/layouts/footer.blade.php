@@ -16,48 +16,48 @@
 
             <!-- Navigation -->
             <div class="space-y-4">
-                <h3 class="text-sm font-semibold">{{ __('navigation.title') }}</h3>
+                <h3 class="text-sm font-semibold">{{ __('app.navigation.title') }}</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="{{ route('home') }}" class="text-muted-foreground hover:text-primary transition-colors">{{ __('navigation.home') }}</a></li>
-                    <li><a href="{{ route('search') }}" class="text-muted-foreground hover:text-primary transition-colors">{{ __('navigation.search') }}</a></li>
+                    <li><a href="{{ route('home') }}" class="text-muted-foreground hover:text-primary transition-colors">{{ __('app.navigation.home') }}</a></li>
+                    <li><a href="{{ route('search') }}" class="text-muted-foreground hover:text-primary transition-colors">{{ __('app.navigation.search') }}</a></li>
                     @auth
-                        <li><a href="{{ route('dashboard') }}" class="text-muted-foreground hover:text-primary transition-colors">{{ __('navigation.dashboard') }}</a></li>
-                        <li><a href="{{ route('library') }}" class="text-muted-foreground hover:text-primary transition-colors">{{ __('navigation.library') }}</a></li>
+                        <li><a href="{{ route('dashboard') }}" class="text-muted-foreground hover:text-primary transition-colors">{{ __('app.navigation.dashboard') }}</a></li>
+                        <li><a href="{{ route('library') }}" class="text-muted-foreground hover:text-primary transition-colors">{{ __('app.navigation.library') }}</a></li>
                     @endauth
                 </ul>
             </div>
 
             <!-- Features -->
             <div class="space-y-4">
-                <h3 class="text-sm font-semibold">{{ __('landing.features.title') }}</h3>
+                <h3 class="text-sm font-semibold">{{ __('app.landing.features.title') }}</h3>
                 <ul class="space-y-2 text-sm">
-                    <li class="text-muted-foreground">{{ __('landing.features.organize.title') }}</li>
-                    <li class="text-muted-foreground">{{ __('landing.features.search.title') }}</li>
-                    <li class="text-muted-foreground">{{ __('landing.features.notes.title') }}</li>
-                    <li class="text-muted-foreground">{{ __('landing.features.import.title') }}</li>
+                    <li class="text-muted-foreground">{{ __('app.landing.features.organize.title') }}</li>
+                    <li class="text-muted-foreground">{{ __('app.landing.features.search.title') }}</li>
+                    <li class="text-muted-foreground">{{ __('app.landing.features.notes.title') }}</li>
+                    <li class="text-muted-foreground">{{ __('app.landing.features.import.title') }}</li>
                 </ul>
             </div>
 
             <!-- Support -->
             <div class="space-y-4">
-                <h3 class="text-sm font-semibold">{{ __('footer.support') }}</h3>
+                <h3 class="text-sm font-semibold">{{ __('app.footer.support') }}</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="#" class="text-muted-foreground hover:text-primary transition-colors">{{ __('footer.help') }}</a></li>
-                    <li><a href="#" class="text-muted-foreground hover:text-primary transition-colors">{{ __('footer.contact') }}</a></li>
-                    <li><a href="#" class="text-muted-foreground hover:text-primary transition-colors">{{ __('footer.privacy') }}</a></li>
-                    <li><a href="#" class="text-muted-foreground hover:text-primary transition-colors">{{ __('footer.terms') }}</a></li>
+                    <li><a href="#" class="text-muted-foreground hover:text-primary transition-colors">{{ __('app.footer.help') }}</a></li>
+                    <li><a href="#" class="text-muted-foreground hover:text-primary transition-colors">{{ __('app.footer.contact') }}</a></li>
+                    <li><a href="#" class="text-muted-foreground hover:text-primary transition-colors">{{ __('app.footer.privacy') }}</a></li>
+                    <li><a href="#" class="text-muted-foreground hover:text-primary transition-colors">{{ __('app.footer.terms') }}</a></li>
                 </ul>
             </div>
         </div>
 
         <div class="border-t mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
             <p class="text-sm text-muted-foreground">
-                © {{ date('Y') }} {{ __('app.name') }}. {{ __('footer.rights') }}
+                © {{ date('Y') }} {{ __('app.name') }}. {{ __('app.footer.rights') }}
             </p>
             <div class="flex items-center space-x-4 mt-4 md:mt-0">
-                <span class="text-sm text-muted-foreground">{{ __('footer.made_with') }}</span>
+                <span class="text-sm text-muted-foreground">{{ __('app.footer.made_with') }}</span>
                 <span class="text-red-500">♥</span>
-                <span class="text-sm text-muted-foreground">{{ __('footer.in_spain') }}</span>
+                <span class="text-sm text-muted-foreground">{{ __('app.footer.in_spain') }}</span>
             </div>
         </div>
     </div>

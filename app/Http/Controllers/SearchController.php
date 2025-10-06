@@ -20,6 +20,7 @@ class SearchController extends Controller
         $books = [];
         $totalResults = 0;
         $isLoading = false;
+        $userBookIds = [];
 
         // If there's a search query, perform the search
         if (!empty($query)) {
@@ -28,13 +29,24 @@ class SearchController extends Controller
             $searchOptions = [
                 'limit' => $request->get('limit', 20),
                 'offset' => $request->get('offset', 0),
-                'language' => $request->get('language', 'es'),
-                'type' => $request->get('type', 'general')
+                'language' => $request->get('language', 'all'),
+                'type' => $request->get('type', 'general'),
+                'sort' => $request->get('sort', 'relevance'),
+                'user_id' => auth()->id() // Pass user ID for local search
             ];
 
             try {
                 $books = $this->bookSearchService->searchBooks($query, $searchOptions);
                 $totalResults = count($books);
+                
+                // Get user's book IDs to mark which books are already in library
+                if (auth()->check()) {
+                    $userBookIds = auth()->user()->userBooks()
+                        ->with('book')
+                        ->get()
+                        ->pluck('book.external_id', 'book.source')
+                        ->all();
+                }
             } catch (\Exception $e) {
                 \Log::error('Search error: ' . $e->getMessage());
                 $books = [];
@@ -44,7 +56,7 @@ class SearchController extends Controller
             $isLoading = false;
         }
 
-        return view('pages.search', compact('query', 'books', 'totalResults', 'isLoading'));
+        return view('pages.search', compact('query', 'books', 'totalResults', 'isLoading', 'userBookIds'));
     }
 
     public function show($source, $id)

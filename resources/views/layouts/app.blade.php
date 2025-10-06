@@ -37,21 +37,21 @@
 
     <!-- Scripts -->
     <script>
-        // Theme management
+        // Theme management - Ejecutar ANTES del DOMContentLoaded para evitar flash
+        (function() {
+            const savedTheme = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('theme='))
+                ?.split('=')[1] || 'light';
+            document.documentElement.classList.remove('light', 'dark');
+            document.documentElement.classList.add(savedTheme);
+        })();
+
         function setTheme(theme) {
             document.documentElement.classList.remove('light', 'dark');
             document.documentElement.classList.add(theme);
             document.cookie = `theme=${theme}; path=/; max-age=31536000`;
         }
-
-        // Initialize theme
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = document.cookie
-                .split('; ')
-                .find(row => row.startsWith('theme='))
-                ?.split('=')[1] || 'light';
-            setTheme(savedTheme);
-        });
     </script>
 </body>
 </html>

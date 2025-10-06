@@ -50,7 +50,7 @@
                                     <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                     </svg>
-                                    {{ __('app.books.actions.addToLibrary') }}
+                                    {{ __('app.books.actions.add_to_library') }}
                                 </button>
                             </form>
                         @else
@@ -171,7 +171,7 @@
                         <div>
                             <h3 class="font-semibold text-foreground mb-3">{{ __('app.books.details.description') }}</h3>
                             <div class="prose prose-sm max-w-none text-muted-foreground">
-                                {!! nl2br(e($book['description'])) !!}
+                                {!! $book['description'] !!}
                             </div>
                         </div>
                     @else
@@ -179,7 +179,7 @@
                             <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
-                            <p>{{ __('app.books.info.noDescription') }}</p>
+                            <p>{{ __('app.books.info.no_description') }}</p>
                         </div>
                     @endif
                 </div>

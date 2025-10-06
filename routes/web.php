@@ -31,6 +31,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/library', [LibraryController::class, 'index'])->name('library');
     Route::post('/library/add', [LibraryController::class, 'addBook'])->name('library.add');
     Route::put('/library/{userBookId}/update', [LibraryController::class, 'updateBook'])->name('library.update');
+    Route::delete('/library/{userBookId}', [LibraryController::class, 'deleteBook'])->name('library.delete');
+    
+    // Custom categories
+    Route::get('/categories', [LibraryController::class, 'manageCategories'])->name('categories.manage');
+    Route::post('/categories', [LibraryController::class, 'storeCategory'])->name('categories.store');
+    Route::put('/categories/{categoryId}', [LibraryController::class, 'updateCategory'])->name('categories.update');
+    Route::delete('/categories/{categoryId}', [LibraryController::class, 'deleteCategory'])->name('categories.delete');
+    Route::post('/library/{userBookId}/categories', [LibraryController::class, 'assignCategories'])->name('library.categories.assign');
+    
     Route::get('/import', [ImportController::class, 'index'])->name('import');
     Route::post('/import', [ImportController::class, 'store'])->name('import.store');
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
@@ -48,6 +57,15 @@ Route::post('/template/upload', [TemplateController::class, 'uploadTemplate'])->
 
 // Book details route (public)
 Route::get('/book/{source}/{id}', [SearchController::class, 'show'])->name('book.details');
+
+// Language switching
+Route::get('/language/{locale}', function ($locale) {
+    if (in_array($locale, ['es', 'en'])) {
+        session(['locale' => $locale]);
+        app()->setLocale($locale);
+    }
+    return redirect()->back();
+})->name('language.switch');
 
 
 Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirect'])->name('google.redirect');
