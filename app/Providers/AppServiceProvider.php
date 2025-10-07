@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 
+use App\Services\Ingest\BookIngestService;
+use App\Services\Ingest\GoogleBooksAdapter;
+use App\Services\Ingest\OpenLibraryAdapter;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -13,7 +16,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(BookIngestService::class, function($app){
+            return new BookIngestService([
+                new OpenLibraryAdapter(),
+                new GoogleBooksAdapter(),
+            ]);
+        });
     }
 
     /**
