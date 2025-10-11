@@ -1,0 +1,32 @@
+# MODELOS ELOQUENT
+
+## Convenciones de Modelos
+- Usar UUIDs para modelos Book y UserBookEvent
+- Usar type hints en todas las propiedades
+- Definir relaciones con docblocks
+- Usar $casts para campos JSON
+
+## Modelos Principales
+
+### Book
+- UUID como primary key
+- Campos: external_id, source, title, authors (JSON), embedding (vector)
+- Relaciones: userBooks, categories, users (through shelves)
+
+### User
+- Relaciones: userBooks, userShelves, userCategories
+- Campos tradicionales de Laravel
+
+### UserBook
+- Relaciones: user, book, userShelfItems
+- Campos: user_rating, started_reading, finished_reading, current_page
+
+### UserShelf
+- Sistema: to-read, reading, read, favorites
+- Personalizadas: creadas por usuarios
+- Campos: is_system, order, color, icon
+
+## Relaciones Especiales
+- Many-to-Many: Book - Category
+- Polymorphic: si se implementan comentarios/ratings
+- Through: User - Book through UserShelfItem

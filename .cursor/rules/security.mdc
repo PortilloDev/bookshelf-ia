@@ -1,0 +1,54 @@
+---
+alwaysApply: true
+---
+
+# Seguridad, OAuth y Operación
+
+## Variables de entorno (NO exponer en diffs)
+- DB_*, OPENAI_API_KEY, GOOGLE_AI_API_KEY, GOOGLE_BOOKS_API_KEY, OAuth Google.
+- NUNCA imprimir ni mover secrets a archivos versionados; usa `.env` y secret manager.
+
+## Autenticación y OAuth
+- Login tradicional + Google OAuth (Sanctum para APIs).
+- Rotar tokens y validar scopes; no loggear tokens.
+- Rate limiting razonable en endpoints públicos de búsqueda.
+
+## Colas y background
+- Importaciones, embeddings y enriquecimiento SIEMPRE por colas.
+- Retentar con backoff; aislar jobs idempotentes; registrar fallos con trazas.
+
+## Internacionalización
+- Mantener `resources/lang/{es,en}` sincronizados; no hardcodear cadenas.
+
+## Despliegue & rendimiento
+- Migraciones atómicas y reversibles; healthchecks antes/después.
+- Cache de consultas frecuentes (catálogos, destacados); invalidación en mutaciones.
+- Imágenes de portadas vía CDN cuando sea posible (optimización de assets).
+
+## Auditoría de datos externos
+- Guardar original en `book_raw` con `checksum` y `fetched_at` para trazabilidad.
+# Seguridad, OAuth y Operación
+
+## Variables de entorno (NO exponer en diffs)
+- DB_*, OPENAI_API_KEY, GOOGLE_AI_API_KEY, GOOGLE_BOOKS_API_KEY, OAuth Google.
+- NUNCA imprimir ni mover secrets a archivos versionados; usa `.env` y secret manager.
+
+## Autenticación y OAuth
+- Login tradicional + Google OAuth (Sanctum para APIs).
+- Rotar tokens y validar scopes; no loggear tokens.
+- Rate limiting razonable en endpoints públicos de búsqueda.
+
+## Colas y background
+- Importaciones, embeddings y enriquecimiento SIEMPRE por colas.
+- Retentar con backoff; aislar jobs idempotentes; registrar fallos con trazas.
+
+## Internacionalización
+- Mantener `resources/lang/{es,en}` sincronizados; no hardcodear cadenas.
+
+## Despliegue & rendimiento
+- Migraciones atómicas y reversibles; healthchecks antes/después.
+- Cache de consultas frecuentes (catálogos, destacados); invalidación en mutaciones.
+- Imágenes de portadas vía CDN cuando sea posible (optimización de assets).
+
+## Auditoría de datos externos
+- Guardar original en `book_raw` con `checksum` y `fetched_at` para trazabilidad.

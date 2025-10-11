@@ -10,47 +10,44 @@ class TemplateController extends Controller
 {
     public function downloadTemplate()
     {
-        // Create CSV template content
+        // Create CSV template content - headers must match ImportController expectations
         $headers = [
-            'Título',
-            'Autor',
-            'Descripción',
-            'Categoría',
-            'Editorial',
-            'Año',
-            'Páginas',
-            'ISBN',
-            'Notas',
-            'Reseña',
-            'Valoración'
+            'title',
+            'author',
+            'isbn',
+            'status',
+            'description',
+            'notes',
+            'rating'
         ];
 
         $sampleData = [
             [
                 'El Quijote',
                 'Miguel de Cervantes',
-                'Las aventuras de Don Quijote de la Mancha',
-                'Clásico',
-                'Editorial Castalia',
-                '1605',
-                '863',
                 '978-84-7039-123-4',
+                'completed',
+                'Las aventuras de Don Quijote de la Mancha, una obra maestra de la literatura universal',
                 'Libro favorito de la infancia',
-                'Una obra maestra de la literatura universal',
                 '5'
             ],
             [
                 'Cien años de soledad',
                 'Gabriel García Márquez',
-                'La historia de la familia Buendía',
-                'Realismo mágico',
-                'Editorial Sudamericana',
-                '1967',
-                '471',
                 '978-84-376-0494-7',
+                'to-read',
+                'La historia de la familia Buendía a lo largo de siete generaciones',
                 'Lectura obligatoria en el colegio',
-                'Una obra fundamental del boom latinoamericano',
-                '5'
+                ''
+            ],
+            [
+                '1984',
+                'George Orwell',
+                '978-84-376-0494-9',
+                'reading',
+                'Novela distópica sobre un régimen totalitario',
+                'Muy interesante y actual',
+                '4'
             ]
         ];
 
@@ -67,7 +64,7 @@ class TemplateController extends Controller
     public function uploadTemplate(Request $request)
     {
         $request->validate([
-            'template_file' => 'required|file|mimes:csv,txt,xlsx,xls|max:10240' // 10MB max
+            'template_file' => 'required|file|mimes:csv,xlsx,xls|max:2048' // 2MB max (matching PHP config)
         ]);
 
         $file = $request->file('template_file');
@@ -76,11 +73,8 @@ class TemplateController extends Controller
         // Store the file temporarily
         $path = $file->storeAs('temp', $filename);
         
-        // Process the file (in a real app, you'd parse and import the data)
-        $filePath = storage_path('app/' . $path);
-        
-        // For now, just return success
-        return redirect()->back()->with('success', __('app.import.messages.templateUploaded'));
+        // Redirect to import page with the file path for processing
+        return redirect()->route('import')->with('success', 'Archivo cargado correctamente. Ahora puedes procesarlo usando el formulario de importación.');
     }
 
     private function arrayToCsv(array $data)

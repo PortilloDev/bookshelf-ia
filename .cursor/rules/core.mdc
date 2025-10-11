@@ -1,0 +1,52 @@
+---
+alwaysApply: true
+---
+
+# BiblioFinder – Reglas Core
+**Objetivo:** mantener un backend Laravel mantenible, consistente y seguro.
+
+## Estilo / Calidad
+- PHP 8.2+ y Laravel 12; tipado estricto y PHPStan/PSALM nivel alto.
+- Funciones y métodos cortos, nombres expresivos, sin efectos colaterales.
+- Prioriza legibilidad sobre “cleverness”. Documenta decisiones no obvias.
+
+## Arquitectura & Capas (Laravel)
+- Controllers delgados: orquestan y validan; la lógica va a Services/Jobs.
+- Usa `app/Services/*` para reglas de negocio y `app/Jobs/*` para trabajo asíncrono (colas).
+- Prohibido acceder directamente a HTTP externos o DB desde controladores: encapsula en Services/Repositories.
+- Evita acoplar dominio con infraestructura (HTTP clients, drivers) mediante interfaces.
+
+## Flujo de cambios asistidos por IA (guardrails)
+- Antes de modificar múltiples archivos: **genera un plan** con pasos y rollback.
+- Cambios de esquema DB: **siempre** con migraciones versionadas y script de datos.
+- NUNCA toques `.env*`, llaves OAuth ni secrets; ni expongas tokens en diffs.
+- Si la tarea es ambigua, primero solicita precisión y supuestos explícitos.
+
+## Observabilidad & Performance
+- Añade logs estructurados en acciones clave y errores.
+- Al proponer optimizaciones, reporta impacto esperado en P95/P99 y consumo de memoria.
+
+# BiblioFinder – Reglas Core
+**Objetivo:** mantener un backend Laravel mantenible, consistente y seguro.
+
+## Estilo / Calidad
+- PHP 8.2+ y Laravel 12; tipado estricto y PHPStan/PSALM nivel alto.
+- Funciones y métodos cortos, nombres expresivos, sin efectos colaterales.
+- Prioriza legibilidad sobre “cleverness”. Documenta decisiones no obvias.
+
+## Arquitectura & Capas (Laravel)
+- Controllers delgados: orquestan y validan; la lógica va a Services/Jobs.
+- Usa `app/Services/*` para reglas de negocio y `app/Jobs/*` para trabajo asíncrono (colas).
+- Prohibido acceder directamente a HTTP externos o DB desde controladores: encapsula en Services/Repositories.
+- Evita acoplar dominio con infraestructura (HTTP clients, drivers) mediante interfaces.
+
+## Flujo de cambios asistidos por IA (guardrails)
+- Antes de modificar múltiples archivos: **genera un plan** con pasos y rollback.
+- Cambios de esquema DB: **siempre** con migraciones versionadas y script de datos.
+- NUNCA toques `.env*`, llaves OAuth ni secrets; ni expongas tokens en diffs.
+- Si la tarea es ambigua, primero solicita precisión y supuestos explícitos.
+
+## Observabilidad & Performance
+- Añade logs estructurados en acciones clave y errores.
+- Al proponer optimizaciones, reporta impacto esperado en P95/P99 y consumo de memoria.
+

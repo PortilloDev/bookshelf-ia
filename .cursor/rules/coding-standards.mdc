@@ -1,0 +1,28 @@
+# ESTÁNDARES DE CÓDIGO
+
+## PHP/Laravel
+- Seguir PSR-1, PSR-2 y PSR-12
+- Usar type hints y return types
+- Aplicar inyección de dependencias
+- Usar Eloquent sobre Query Builder cuando sea posible
+
+## Blade Templates
+- Mantener lógica mínima en vistas
+- Usar componentes Blade para elementos reutilizables
+- Aplicar TailwindCSS para estilos
+
+## JavaScript
+- Vanilla JS o Alpine.js para interactividad
+- Usar async/await sobre promesas con .then()
+- Mantener scripts pequeños y específicos
+
+## Base de Datos
+- Usar migraciones para todos los cambios
+- Añadir índices para consultas frecuentes
+- Usar transacciones para operaciones múltiples
+
+## Convenciones de Nombrado
+- Modelos: PascalCase (Book, UserShelf)
+- Tablas: snake_case (user_books, user_shelves)
+- Variables: camelCase ($bookCollection)
+- Métodos: camelCase (searchBooks, calculateReadingProgress)
