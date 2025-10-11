@@ -38,14 +38,15 @@
                 </ul>
             </div>
 
-            <!-- Support -->
+            <!-- Legal & Support -->
             <div class="space-y-4">
                 <h3 class="text-sm font-semibold">{{ __('app.footer.support') }}</h3>
                 <ul class="space-y-2 text-sm">
                     <li><a href="#" class="text-muted-foreground hover:text-primary transition-colors">{{ __('app.footer.help') }}</a></li>
-                    <li><a href="#" class="text-muted-foreground hover:text-primary transition-colors">{{ __('app.footer.contact') }}</a></li>
-                    <li><a href="#" class="text-muted-foreground hover:text-primary transition-colors">{{ __('app.footer.privacy') }}</a></li>
-                    <li><a href="#" class="text-muted-foreground hover:text-primary transition-colors">{{ __('app.footer.terms') }}</a></li>
+                    <li><a href="mailto:ivan.portillo@notasweb.me" class="text-muted-foreground hover:text-primary transition-colors">{{ __('app.footer.contact') }}</a></li>
+                    <li><a href="{{ route('privacy') }}" class="text-muted-foreground hover:text-primary transition-colors">{{ __('app.footer.privacy') }}</a></li>
+                    <li><a href="{{ route('legal') }}" class="text-muted-foreground hover:text-primary transition-colors">{{ __('app.footer.terms') }}</a></li>
+                    <li><a href="{{ route('cookies') }}" class="text-muted-foreground hover:text-primary transition-colors">Política de Cookies</a></li>
                 </ul>
             </div>
         </div>

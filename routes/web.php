@@ -12,6 +12,7 @@ use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TemplateController;
+use App\Http\Controllers\LegalController;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -70,3 +71,8 @@ Route::get('/language/{locale}', function ($locale) {
 
 Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirect'])->name('google.redirect');
 Route::get('/auth/google/callback', [SocialAuthController::class, 'callback'])->name('google.callback');
+
+// Legal pages (public)
+Route::get('/legal', [LegalController::class, 'legal'])->name('legal');
+Route::get('/privacy', [LegalController::class, 'privacy'])->name('privacy');
+Route::get('/cookies', [LegalController::class, 'cookies'])->name('cookies');
