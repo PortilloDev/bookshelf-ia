@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\Book;
 use App\Models\UserBook;
 use App\Models\UserShelf;
 use App\Models\UserShelfItem;
+use App\Models\UserCategory;
 
 class LibraryController extends Controller
 {
@@ -151,18 +153,19 @@ class LibraryController extends Controller
         }
     }
 
-    public function updateBook(Request $request, $userBookId)
+    public function updateBook(Request $request, $userBookSlug)
     {
         try {
             $request->validate([
                 'notes' => 'nullable|string|max:1000',
                 'user_rating' => 'nullable|integer|between:1,5',
+                'status' => 'nullable|string|in:to-read,reading,read,favorites,wishlist',
                 'shelf_ids' => 'nullable|array',
                 'shelf_ids.*' => 'exists:user_shelves,id'
             ]);
 
             $user = Auth::user();
-            $userBook = UserBook::where('id', $userBookId)
+            $userBook = UserBook::where('slug', $userBookSlug)
                                ->where('user_id', $user->id)
                                ->first();
 
@@ -170,20 +173,44 @@ class LibraryController extends Controller
                 return redirect()->back()->with('error', 'Libro no encontrado en tu biblioteca');
             }
 
+            // Update user book data
             $userBook->update([
                 'notes' => $request->notes,
                 'user_rating' => $request->user_rating
             ]);
 
-            // Sync shelves
+            // Handle shelves (both system status and custom shelves)
+            $shelfIds = [];
+            
+            // Add system shelf if status is provided
+            if ($request->has('status') && $request->status) {
+                $systemShelf = UserShelf::where('user_id', $user->id)
+                                       ->where('slug', $request->status)
+                                       ->where('is_system', true)
+                                       ->first();
+                
+                if ($systemShelf) {
+                    $shelfIds[] = $systemShelf->id;
+                }
+            }
+            
+            // Add custom shelves if provided
             if ($request->has('shelf_ids')) {
+                $shelfIds = array_merge($shelfIds, $request->shelf_ids);
+            }
+            
+            // Remove duplicates
+            $shelfIds = array_unique($shelfIds);
+            
+            // Update shelf items
+            if (!empty($shelfIds)) {
                 // Remove old shelf items
                 UserShelfItem::where('user_id', $user->id)
                     ->where('book_id', $userBook->book_id)
                     ->delete();
                 
                 // Add new shelf items
-                foreach ($request->shelf_ids as $shelfId) {
+                foreach ($shelfIds as $shelfId) {
                     UserShelfItem::create([
                         'user_id' => $user->id,
                         'shelf_id' => $shelfId,
@@ -201,11 +228,11 @@ class LibraryController extends Controller
         }
     }
 
-    public function deleteBook($userBookId)
+    public function deleteBook($userBookSlug)
     {
         try {
             $user = Auth::user();
-            $userBook = UserBook::where('id', $userBookId)
+            $userBook = UserBook::where('slug', $userBookSlug)
                                ->where('user_id', $user->id)
                                ->first();
 
@@ -320,7 +347,7 @@ class LibraryController extends Controller
         }
     }
 
-    public function assignCategories(Request $request, $userBookId)
+    public function assignCategories(Request $request, $userBookSlug)
     {
         try {
             $request->validate([
@@ -329,7 +356,7 @@ class LibraryController extends Controller
             ]);
 
             $user = Auth::user();
-            $userBook = UserBook::where('id', $userBookId)
+            $userBook = UserBook::where('slug', $userBookSlug)
                                ->where('user_id', $user->id)
                                ->first();
 

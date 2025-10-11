@@ -31,15 +31,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/library', [LibraryController::class, 'index'])->name('library');
     Route::post('/library/add', [LibraryController::class, 'addBook'])->name('library.add');
-    Route::put('/library/{userBookId}/update', [LibraryController::class, 'updateBook'])->name('library.update');
-    Route::delete('/library/{userBookId}', [LibraryController::class, 'deleteBook'])->name('library.delete');
+    Route::put('/library/{userBookSlug}/update', [LibraryController::class, 'updateBook'])->name('library.update');
+    Route::delete('/library/{userBookSlug}', [LibraryController::class, 'deleteBook'])->name('library.delete');
     
     // Custom categories
     Route::get('/categories', [LibraryController::class, 'manageCategories'])->name('categories.manage');
     Route::post('/categories', [LibraryController::class, 'storeCategory'])->name('categories.store');
     Route::put('/categories/{categoryId}', [LibraryController::class, 'updateCategory'])->name('categories.update');
     Route::delete('/categories/{categoryId}', [LibraryController::class, 'deleteCategory'])->name('categories.delete');
-    Route::post('/library/{userBookId}/categories', [LibraryController::class, 'assignCategories'])->name('library.categories.assign');
+    Route::post('/library/{userBookSlug}/categories', [LibraryController::class, 'assignCategories'])->name('library.categories.assign');
     
     Route::get('/import', [ImportController::class, 'index'])->name('import');
     Route::post('/import', [ImportController::class, 'store'])->name('import.store');
