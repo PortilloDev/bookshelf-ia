@@ -315,5 +315,26 @@ return [
         'not_found' => 'The requested resource was not found',
         'unauthorized' => 'You do not have permission for this action',
         'validation' => 'Please verify the entered data'
+    ],
+
+    'emails' => [
+        'welcome' => [
+            'subject' => 'Welcome to :app! Start organizing your library',
+            'title' => 'Welcome to :app!',
+            'subtitle' => 'Your personal library awaits you',
+            'greeting' => 'Hello :name!',
+            'message' => 'Thank you for joining our community of passionate readers. We\'re excited to help you organize, discover, and enjoy your books like never before.',
+            'philosophy_title' => 'Our Passion for Books',
+            'philosophy_message' => 'Books have the power to transform lives, expand minds, and connect us across cultures and time. We believe that everyone should have access to tools that help them discover, organize, and cherish their personal library.',
+            'philosophy_vision' => 'That\'s why we\'ve created :app as a free and open platform - because the love of reading should be accessible to everyone, everywhere.',
+            'features_title' => 'What you can do with :app:',
+            'feature_1' => 'Organize your books in custom shelves',
+            'feature_2' => 'Discover millions of books from Google Books and Open Library',
+            'feature_3' => 'Add personal notes and ratings to your books',
+            'feature_4' => 'Import your existing book lists from Excel',
+            'get_started' => 'Ready to start? Click the button below to access your dashboard and begin organizing your library.',
+            'cta_button' => 'Go to Dashboard',
+            'footer_message' => 'If you have any questions, feel free to contact us. We\'re here to help!'
+        ]
     ]
 ];

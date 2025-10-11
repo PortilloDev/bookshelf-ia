@@ -389,5 +389,26 @@ return [
         'rights' => 'Todos los derechos reservados.',
         'made_with' => 'Hecho con',
         'in_spain' => 'en España'
+    ],
+
+    'emails' => [
+        'welcome' => [
+            'subject' => '¡Bienvenido a :app! Comienza a organizar tu biblioteca',
+            'title' => '¡Bienvenido a :app!',
+            'subtitle' => 'Tu biblioteca personal te espera',
+            'greeting' => '¡Hola :name!',
+            'message' => 'Gracias por unirte a nuestra comunidad de lectores apasionados. Estamos emocionados de ayudarte a organizar, descubrir y disfrutar tus libros como nunca antes.',
+            'philosophy_title' => 'Nuestra Pasión por los Libros',
+            'philosophy_message' => 'Los libros tienen el poder de transformar vidas, expandir mentes y conectarnos a través de culturas y tiempo. Creemos que todos deberían tener acceso a herramientas que les ayuden a descubrir, organizar y atesorar su biblioteca personal.',
+            'philosophy_vision' => 'Por eso hemos creado :app como una plataforma gratuita y abierta - porque el amor por la lectura debería ser accesible para todos, en todas partes.',
+            'features_title' => 'Lo que puedes hacer con :app:',
+            'feature_1' => 'Organiza tus libros en estanterías personalizadas',
+            'feature_2' => 'Descubre millones de libros desde Google Books y Open Library',
+            'feature_3' => 'Añade notas personales y valoraciones a tus libros',
+            'feature_4' => 'Importa tus listas de libros existentes desde Excel',
+            'get_started' => '¿Listo para comenzar? Haz clic en el botón de abajo para acceder a tu dashboard y comenzar a organizar tu biblioteca.',
+            'cta_button' => 'Ir al Dashboard',
+            'footer_message' => 'Si tienes alguna pregunta, no dudes en contactarnos. ¡Estamos aquí para ayudarte!'
+        ]
     ]
 ];

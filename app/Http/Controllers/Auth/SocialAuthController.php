@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendWelcomeEmail;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -31,6 +32,8 @@ class SocialAuthController extends Controller
             $user = User::where('email', $googleUser->getEmail())->first();
         }
 
+        $isNewUser = !$user;
+
         if (!$user) {
             // crear nuevo user (password nullable)
             $user = new User();
@@ -45,6 +48,11 @@ class SocialAuthController extends Controller
         $user->provider_id = $googleUser->getId();
         $user->avatar = $googleUser->getAvatar();
         $user->save();
+
+        // Enviar correo de bienvenida solo para usuarios nuevos
+        if ($isNewUser) {
+            SendWelcomeEmail::dispatch($user);
+        }
 
         Auth::login($user, remember: true);
 
