@@ -1,7 +1,6 @@
 ---
-alwaysApply: true
+alwaysApply: false
 ---
-
 # BiblioFinder – Reglas Core
 **Objetivo:** mantener un backend Laravel mantenible, consistente y seguro.
 
