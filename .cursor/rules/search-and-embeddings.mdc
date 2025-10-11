@@ -1,0 +1,25 @@
+# Búsqueda & Embeddings
+
+## Datos y modelos relevantes
+- PostgreSQL + pgvector para similitud semántica.
+- Modelos con campos `embedding`, `embedding_model`, `embedding_dim`, `embedding_updated_at`, `tsv` para híbrida (full-text + vector).
+- Servicios externos: Google Books API, Open Library API.
+- Proveedores de embeddings: OpenAI y Google AI.
+
+## Reglas de diseño de búsqueda
+- Búsqueda **híbrida**: combinar `tsvector` y similitud vectorial cuando aplique.
+- Normalización: `EmbeddingService::normalize` previo a indexar o consultar.
+- Cachear `embedQueryCached(query, ttl)` para queries repetidas.
+- Evitar recalcular embeddings si `embedding_updated_at` < TTL o no hubo cambios.
+
+## Rendimiento & índices
+- Mantener índices para FTS (`tsv`) y vector (`ivfflat/hnsw` según tu despliegue pgvector).
+- Paginación obligatoria y límite duro de resultados.
+- Registrar tiempos y número de llamadas a APIs externas por request.
+
+## Integración con APIs
+- Implementar timeouts, backoff exponencial y circuit breaker para Google/Open Library.
+- Deduplicar por `external_id + source`, enriqueciendo `Book` sin duplicados.
+
+## Seguridad de datos
+- No persistir payloads externos sin sanitización; usar tabla `book_raw` para histórico/auditoría.

@@ -28,18 +28,52 @@
             <!-- Column Instructions -->
             <div class="border rounded-lg p-6">
                 <h3 class="text-lg font-semibold mb-4">{{ __('app.import.instructions.columns.title') }}</h3>
-                <ul class="space-y-2 text-sm text-muted-foreground">
-                    <li>• {{ __('app.import.instructions.columns.required') }}</li>
-                    <li>• {{ __('app.import.instructions.columns.optional') }}</li>
-                    <li>• {{ __('app.import.instructions.columns.metadata') }}</li>
-                    <li>• {{ __('app.import.instructions.columns.personal') }}</li>
-                </ul>
+                <div class="space-y-3 text-sm">
+                    <div>
+                        <h4 class="font-medium text-foreground mb-1">Columnas requeridas:</h4>
+                        <p class="text-muted-foreground">• <strong>title</strong> (o Title, Título) - Título del libro</p>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-foreground mb-1">Columnas opcionales:</h4>
+                        <p class="text-muted-foreground">• <strong>author</strong> (o Author, Autor) - Autor del libro</p>
+                        <p class="text-muted-foreground">• <strong>isbn</strong> (o ISBN) - ISBN del libro</p>
+                        <p class="text-muted-foreground">• <strong>status</strong> (o Status, Estado) - Estado: to-read, reading, completed</p>
+                        <p class="text-muted-foreground">• <strong>description</strong> - Descripción del libro</p>
+                        <p class="text-muted-foreground">• <strong>notes</strong> - Notas personales</p>
+                        <p class="text-muted-foreground">• <strong>rating</strong> - Valoración (1-5)</p>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Upload Form -->
         <div class="max-w-2xl mx-auto">
-            <form method="POST" action="{{ route('import.store') }}" enctype="multipart/form-data" class="space-y-6">
+            <!-- Display validation errors -->
+            @if ($errors->any())
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
+                    <h4 class="text-red-800 font-medium mb-2">Errores de validación:</h4>
+                    <ul class="text-red-700 text-sm space-y-1">
+                        @foreach ($errors->all() as $error)
+                            <li>• {{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <!-- Display success/error messages -->
+            @if (session('success'))
+                <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
+                    <p class="text-green-800">{{ session('success') }}</p>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
+                    <p class="text-red-800">{{ session('error') }}</p>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('import.store') }}" enctype="multipart/form-data" class="space-y-6" id="import-form">
                 @csrf
                 
                 <!-- File Upload -->
@@ -60,7 +94,7 @@
                            class="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90">
                     
                     <p id="file-name" class="text-xs text-muted-foreground mt-2">
-                        {{ __('app.import.upload.supports') }}
+                        {{ __('app.import.upload.supports') }} (Máximo 2MB)
                     </p>
                 </div>
 
@@ -94,6 +128,38 @@
                     </button>
                 </div>
             </form>
+
+            <!-- Example CSV Format -->
+            <div class="mt-8 p-6 bg-muted rounded-lg">
+                <h3 class="text-lg font-semibold mb-4">Ejemplos de formato CSV:</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-medium text-foreground mb-2">Con comas (recomendado):</h4>
+                        <div class="bg-background p-4 rounded border font-mono text-sm overflow-x-auto">
+                            <pre>title,author,isbn,status,description,notes,rating
+"El Quijote","Miguel de Cervantes","978-84-7039-123-4","completed","Las aventuras de Don Quijote de la Mancha, una obra maestra de la literatura universal","Libro favorito de la infancia","5"
+"Cien años de soledad","Gabriel García Márquez","978-84-376-0494-7","to-read","La historia de la familia Buendía a lo largo de siete generaciones","Lectura obligatoria en el colegio",""
+"1984","George Orwell","978-84-376-0494-9","reading","Novela distópica sobre un régimen totalitario","Muy interesante y actual","4"</pre>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-medium text-foreground mb-2">Con punto y coma (también soportado):</h4>
+                        <div class="bg-background p-4 rounded border font-mono text-sm overflow-x-auto">
+                            <pre>title;author;isbn;status;description;notes;rating
+"El Quijote";"Miguel de Cervantes";"978-84-7039-123-4";"completed";"Las aventuras de Don Quijote de la Mancha, una obra maestra de la literatura universal";"Libro favorito de la infancia";"5"
+"Cien años de soledad";"Gabriel García Márquez";"978-84-376-0494-7";"to-read";"La historia de la familia Buendía a lo largo de siete generaciones";"Lectura obligatoria en el colegio";""
+"1984";"George Orwell";"978-84-376-0494-9";"reading";"Novela distópica sobre un régimen totalitario";"Muy interesante y actual";"4"</pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="text-sm text-muted-foreground mt-4">
+                    <strong>Nota:</strong> Asegúrate de que todas las filas tengan el mismo número de columnas que el encabezado. 
+                    El sistema detecta automáticamente si usas comas (,) o punto y coma (;) como separador.
+                </p>
+            </div>
 
             <!-- Template Actions -->
             <div class="text-center mt-8">
@@ -183,8 +249,18 @@
     });
 
     function updateFileName(name) {
-        fileName.textContent = 'Archivo seleccionado: ' + name;
-        fileName.classList.add('font-semibold', 'text-foreground');
+        const extension = name.split('.').pop().toLowerCase();
+        const allowedExtensions = ['csv', 'xlsx', 'xls'];
+        
+        if (allowedExtensions.includes(extension)) {
+            fileName.textContent = 'Archivo seleccionado: ' + name;
+            fileName.classList.add('font-semibold', 'text-foreground');
+            fileName.classList.remove('text-red-600');
+        } else {
+            fileName.textContent = 'Archivo no válido: ' + name + ' (Solo se permiten .csv, .xlsx, .xls)';
+            fileName.classList.add('font-semibold', 'text-red-600');
+            fileName.classList.remove('text-foreground');
+        }
     }
 
     // Click on dropzone to trigger file input
@@ -193,5 +269,53 @@
             fileInput.click();
         }
     });
+
+    // Form submission debugging
+    const form = document.getElementById('import-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('Form submission started');
+            console.log('Form action:', form.action);
+            console.log('Form method:', form.method);
+            console.log('Form enctype:', form.enctype);
+            
+            const fileInput = document.getElementById('file-input');
+            if (fileInput && fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const extension = file.name.split('.').pop().toLowerCase();
+                const allowedExtensions = ['csv', 'xlsx', 'xls'];
+                
+                console.log('File selected:', file.name);
+                console.log('File size:', file.size);
+                console.log('File extension:', extension);
+                
+                if (!allowedExtensions.includes(extension)) {
+                    console.log('Invalid file extension');
+                    e.preventDefault();
+                    alert('Por favor selecciona un archivo válido (.csv, .xlsx, .xls).');
+                    return false;
+                }
+                
+                if (file.size > 2 * 1024 * 1024) { // 2MB
+                    console.log('File too large');
+                    e.preventDefault();
+                    alert('El archivo es demasiado grande. El tamaño máximo es 2MB.');
+                    return false;
+                }
+            } else {
+                console.log('No file selected');
+                e.preventDefault();
+                alert('Por favor selecciona un archivo para importar.');
+                return false;
+            }
+            
+            // Show loading state
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = 'Procesando...';
+            }
+        });
+    }
 </script>
 @endsection

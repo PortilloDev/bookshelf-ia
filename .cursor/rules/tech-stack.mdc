@@ -1,0 +1,30 @@
+# STACK TECNOLÓGICO
+
+## Backend
+- PHP 8.2+
+- Laravel 12
+- PostgreSQL con extensión pgvector
+- Laravel Sanctum para autenticación API
+- Laravel Queue System
+
+## Frontend
+- Blade templates
+- TailwindCSS
+- JavaScript vanilla (sin frameworks pesados)
+
+## APIs Externas
+- Google Books API
+- Open Library API
+- OpenAI Embeddings API
+- Google AI Embeddings
+
+## Base de Datos
+- PostgreSQL 13+
+- Extensión pgvector para embeddings
+- Índices GIN para búsqueda full-text
+- JSON fields para datos flexibles
+
+## Herramientas de Desarrollo
+- Composer para dependencias PHP
+- npm para assets frontend
+- Artisan para comandos

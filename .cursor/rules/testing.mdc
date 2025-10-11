@@ -1,0 +1,21 @@
+---
+alwaysApply: false
+---
+
+# Testing & QA
+
+## Pirámide de tests (objetivo)
+- Unit > Integración > E2E.
+- Cobertura mínima: 80% en Services (negocio) y Jobs críticos.
+
+## Directrices
+- Tests unitarios para `BookSearchService` y `EmbeddingService` con dobles de prueba de APIs.
+- Tests de integración: repositorios y consultas (FTS + vector) con PostgreSQL local.
+- E2E básicos para flujos: autenticación, búsqueda, añadir a estantería, importación.
+
+## Fixtures & Mocks
+- Builders/factories para libros, usuarios y estanterías.
+- No “over-mocking” de Eloquent; en integración usa DB real con transacciones.
+
+## Observabilidad
+- Registrar métricas de latencia (P95/P99) en búsquedas y en Jobs de importación/embeddings.

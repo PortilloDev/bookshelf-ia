@@ -1,0 +1,60 @@
+---
+alwaysApply: false
+---
+# FUNCIONALIDADES ESPECÍFICAS
+
+## Búsqueda Semántica
+- Usar EmbeddingService para generar embeddings
+- Cache de embeddings con TTL
+- Búsqueda híbrida (texto + semántica)
+- Soporte para múltiples proveedores (OpenAI, Google AI)
+
+## Sistema de Estanterías
+- Estanterías del sistema: to-read, reading, read, favorites
+- Estanterías personalizadas creadas por usuarios
+- Posicionamiento manual en estanterías
+
+## Importación de Datos
+- Procesamiento en cola para archivos grandes
+- Enriquecimiento automático con APIs externas
+- Validación de datos de entrada
+- Plantillas predefinidas para Excel/CSV
+
+## Gestión de Libros
+- Búsqueda en múltiples fuentes (local, Google Books, Open Library)
+- Detalles completos con portadas y descripciones
+- Sistema de categorías globales y personales
+
+## Estadísticas y Seguimiento
+- Progreso de lectura (páginas, fechas)
+- Contadores por estantería
+- Ratings personales
+- Eventos de lectura# FUNCIONALIDADES ESPECÍFICAS
+
+## Búsqueda Semántica
+- Usar EmbeddingService para generar embeddings
+- Cache de embeddings con TTL
+- Búsqueda híbrida (texto + semántica)
+- Soporte para múltiples proveedores (OpenAI, Google AI)
+
+## Sistema de Estanterías
+- Estanterías del sistema: to-read, reading, read, favorites
+- Estanterías personalizadas creadas por usuarios
+- Posicionamiento manual en estanterías
+
+## Importación de Datos
+- Procesamiento en cola para archivos grandes
+- Enriquecimiento automático con APIs externas
+- Validación de datos de entrada
+- Plantillas predefinidas para Excel/CSV
+
+## Gestión de Libros
+- Búsqueda en múltiples fuentes (local, Google Books, Open Library)
+- Detalles completos con portadas y descripciones
+- Sistema de categorías globales y personales
+
+## Estadísticas y Seguimiento
+- Progreso de lectura (páginas, fechas)
+- Contadores por estantería
+- Ratings personales
+- Eventos de lectura

@@ -1,0 +1,57 @@
+---
+alwaysApply: true
+---
+# ARQUITECTURA DEL SISTEMA
+
+# Convenciones Laravel
+
+## Estructura de código (respetar árbol del proyecto)
+- `app/Http/Controllers`: controladores HTTP
+- `app/Services`: servicios de negocio (p. ej., BookSearchService, EmbeddingService)
+- `app/Jobs`: trabajos en cola
+- `database/migrations|seeders`: cambios de esquema/datos
+- `resources/views`: Blade + Tailwind
+- `routes/web.php` y `routes/api.php`
+(No crear carpetas fuera de esta convención salvo RFC.)
+
+## Controladores
+- Validación con FormRequest o `->validate()`; nunca lógica de negocio pesada.
+- Respuestas JSON en API con códigos y estructura consistente (`data`, `error`).
+- Paginación obligatoria en listados y búsquedas.
+
+## Servicios & Jobs
+- `BookSearchService`: orquesta búsqueda local + Google Books + Open Library; deduplicación y formateo. Mantener su contrato estable. 
+- `EmbeddingService`: generación y cache de embeddings; soporta OpenAI y Google. Exponer métodos `embedDocument`, `embedQuery`, `embedQueryCached`.
+- Trabajos largos: usar **colas** (importaciones, embeddings, enriquecimiento).
+(Estas responsabilidades existen ya en el proyecto y deben respetarse.) 
+
+## Cache & Config
+- Usa caché para listados “populares” y paneles (ej. Home/Dashboard).
+- Invalida cache en mutaciones relevantes (creación/edición de libros).
+# ARQUITECTURA DEL SISTEMA
+
+# Convenciones Laravel
+
+## Estructura de código (respetar árbol del proyecto)
+- `app/Http/Controllers`: controladores HTTP
+- `app/Services`: servicios de negocio (p. ej., BookSearchService, EmbeddingService)
+- `app/Jobs`: trabajos en cola
+- `database/migrations|seeders`: cambios de esquema/datos
+- `resources/views`: Blade + Tailwind
+- `routes/web.php` y `routes/api.php`
+(No crear carpetas fuera de esta convención salvo RFC.)
+
+## Controladores
+- Validación con FormRequest o `->validate()`; nunca lógica de negocio pesada.
+- Respuestas JSON en API con códigos y estructura consistente (`data`, `error`).
+- Paginación obligatoria en listados y búsquedas.
+
+## Servicios & Jobs
+- `BookSearchService`: orquesta búsqueda local + Google Books + Open Library; deduplicación y formateo. Mantener su contrato estable. 
+- `EmbeddingService`: generación y cache de embeddings; soporta OpenAI y Google. Exponer métodos `embedDocument`, `embedQuery`, `embedQueryCached`.
+- Trabajos largos: usar **colas** (importaciones, embeddings, enriquecimiento).
+(Estas responsabilidades existen ya en el proyecto y deben respetarse.) 
+
+## Cache & Config
+- Usa caché para listados “populares” y paneles (ej. Home/Dashboard).
+- Invalida cache en mutaciones relevantes (creación/edición de libros).

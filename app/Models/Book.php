@@ -11,7 +11,7 @@ class Book extends Model
 
     protected $fillable = [
         'external_id', 'source', 'title', 'authors', 'description', 
-        'isbn', 'publisher', 'published_date', 'page_count', 'language',
+        'isbn', 'isbn13', 'publisher', 'published_date', 'page_count', 'language',
         'categories', 'tags', 'rating', 'cover_url', 'preview_url', 'info_url'
     ];
 

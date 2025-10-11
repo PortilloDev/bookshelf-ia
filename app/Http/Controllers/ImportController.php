@@ -20,8 +20,41 @@ class ImportController extends Controller
 
     public function store(Request $request)
     {
+        // Debug logging
+        Log::info('Import request received', [
+            'method' => $request->method(),
+            'has_file' => $request->hasFile('file'),
+            'all_files' => $request->allFiles(),
+            'all_data' => $request->all()
+        ]);
+
+        // Additional file debugging
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            Log::info('File details', [
+                'original_name' => $file->getClientOriginalName(),
+                'extension' => $file->getClientOriginalExtension(),
+                'mime_type' => $file->getMimeType(),
+                'size' => $file->getSize(),
+                'is_valid' => $file->isValid(),
+                'error' => $file->getError()
+            ]);
+        }
+
         $request->validate([
-            'file' => 'required|file|mimes:csv,xlsx,xls|max:10240' // 10MB max
+            'file' => [
+                'required',
+                'file',
+                'max:2048', // 2MB max (matching PHP config)
+                function ($attribute, $value, $fail) {
+                    $extension = strtolower($value->getClientOriginalExtension());
+                    $allowedExtensions = ['csv', 'xlsx', 'xls'];
+                    
+                    if (!in_array($extension, $allowedExtensions)) {
+                        $fail('El archivo debe ser un CSV o Excel (.csv, .xlsx, .xls). Extensión recibida: ' . $extension);
+                    }
+                }
+            ]
         ]);
 
         try {
@@ -41,7 +74,6 @@ class ImportController extends Controller
             
             $imported = 0;
             $errors = [];
-            
             if ($extension === 'csv') {
                 $imported = $this->importFromCSV($absolutePath, $request);
             } else {
@@ -52,11 +84,14 @@ class ImportController extends Controller
             Storage::disk('local')->delete($path);
             
             if ($imported > 0) {
-                return redirect()->route('library')->with('success', __('app.import.messages.success') . " ({$imported} libros importados)");
+                return redirect()->route('library')->with('success', "¡Importación exitosa! Se importaron {$imported} libros.");
             } else {
-                return redirect()->route('import')->with('error', __('app.import.messages.no_books_found'));
+                return redirect()->route('import')->with('error', 'No se encontraron libros válidos para importar. Verifica que el archivo tenga el formato correcto y que las columnas requeridas estén presentes.');
             }
             
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Import validation error: ' . $e->getMessage());
+            return redirect()->route('import')->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             Log::error('Import error: ' . $e->getMessage());
             return redirect()->route('import')->with('error', __('app.import.messages.error') . ': ' . $e->getMessage());
@@ -78,23 +113,52 @@ class ImportController extends Controller
             throw new \Exception("Could not open file: {$absolutePath}");
         }
         
-        $header = fgetcsv($file); // Read header row
+        // Read first line to detect separator
+        $firstLine = fgets($file);
+        rewind($file);
+        
+        // Detect separator (comma or semicolon)
+        $separator = ',';
+        if (strpos($firstLine, ';') !== false && strpos($firstLine, ';') > strpos($firstLine, ',')) {
+            $separator = ';';
+        }
+        
+        Log::info('CSV separator detected', ['separator' => $separator, 'first_line' => $firstLine]);
+        
+        $header = fgetcsv($file, 0, $separator); // Read header row with detected separator
         
         if ($header === false || empty($header)) {
             fclose($file);
             throw new \Exception("Could not read header row from CSV file");
         }
         
-        while (($row = fgetcsv($file)) !== false) {
-            if (count($row) < 1 || empty($row[0])) continue;
+        Log::info('CSV header parsed', ['header' => $header, 'header_count' => count($header)]);
+        
+        $rowNumber = 1; // Start from 1 since we already read the header
+        
+        while (($row = fgetcsv($file, 0, $separator)) !== false) {
+            $rowNumber++;
+            
+            if (count($row) < 1 || empty($row[0])) {
+                Log::warning("Skipping empty row at line {$rowNumber}");
+                continue;
+            }
+            
+            // Check if row has same number of columns as header
+            if (count($row) !== count($header)) {
+                Log::warning("Row {$rowNumber} has " . count($row) . " columns but header has " . count($header) . " columns. Skipping row.");
+                continue;
+            }
             
             try {
                 $data = array_combine($header, $row);
                 if ($data !== false) {
                     $imported += $this->importBook($data, $user, $skipDuplicates);
+                } else {
+                    Log::warning("Failed to combine header and row data at line {$rowNumber}");
                 }
             } catch (\Exception $e) {
-                Log::warning('Error importing row: ' . $e->getMessage());
+                Log::warning("Error importing row {$rowNumber}: " . $e->getMessage());
                 continue;
             }
         }
@@ -112,8 +176,27 @@ class ImportController extends Controller
     
     private function importBook($data, $user, $skipDuplicates)
     {
-        $title = $data['title'] ?? $data['Title'] ?? $data['Título'] ?? null;
-        if (!$title) return 0;
+        // Log the data being processed for debugging
+        Log::info('Processing book data', ['data' => $data]);
+        
+        // Try different variations of title field names
+        $title = $data['title'] ?? $data['Title'] ?? $data['Título'] ?? $data['titulo'] ?? null;
+        
+        // If still no title, try to get the first non-empty value as title
+        if (!$title) {
+            foreach ($data as $key => $value) {
+                if (!empty(trim($value))) {
+                    $title = trim($value);
+                    Log::info("Using first non-empty field as title", ['field' => $key, 'value' => $title]);
+                    break;
+                }
+            }
+        }
+        
+        if (!$title) {
+            Log::warning('Book skipped: No title found', ['available_keys' => array_keys($data), 'data' => $data]);
+            return 0;
+        }
         
         $authors = $data['author'] ?? $data['Author'] ?? $data['Autor'] ?? null;
         $isbn = $data['isbn'] ?? $data['ISBN'] ?? null;
